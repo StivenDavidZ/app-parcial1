@@ -1,0 +1,50 @@
+name: Pruebas Automatizadas
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Configurar Maven Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Ejecutar pruebas
+        run: ./mvnw test
+        
+      - name: Notificar estado
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { status } = context.job
+            const state = status === 'success' ? '✅ passed' : '❌ failed'
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: `Las pruebas automatizadas han ${state}`
+            }) 

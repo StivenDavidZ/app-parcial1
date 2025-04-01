@@ -19,7 +19,7 @@ public class HolaMundoControllerIntegrationTest {
         ResponseEntity<String> respuesta = restTemplate.getForEntity("/hola", String.class);
 
         // 2. Verifica que la respuesta sea HTTP 200 (OK)
-        assertEquals(200, respuesta.getStatusCodeValue());
+        assertEquals(200, respuesta.getStatusCode().value());
 
         // 3. Verifica que el cuerpo de la respuesta sea "¡Hola, Mundo!"
         assertEquals("¡Hola, Mundo!", respuesta.getBody());
